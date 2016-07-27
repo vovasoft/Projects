@@ -1,0 +1,86 @@
+import java.util.*;
+ interface Subject{                          //主题接口
+	public void registerObserver(Observer o);
+	public void removeObserver(Observer o);
+	public void notifyObservers();
+}
+
+ interface Observer{							//观察者接口
+	public void update(float temp,float humidity,float pressure);
+}
+
+ interface DisplayElement{					//组件接口
+	public void display();
+}
+
+class WeatherData implements Subject/*,Observer,DisplayElement*/{
+	private ArrayList observers;   //
+	private float temperature;
+	private float humidity;
+	private float pressure;
+	
+	public WeatherData(){
+		observers = new ArrayList();
+	}
+	
+	public void registerObserver(Observer o){
+		observers.add(o);
+	}
+	public void removeObserver(Observer o){
+		int i = observers.indexOf(o);
+		if(i>=0){
+			observers.remove(i);
+		}
+	}
+	public void notifyObservers(){
+		for(int i=0;i<observers.size();i++){
+			Observer ob = (Observer)observers.get(i);
+			ob.update(temperature,humidity,pressure);
+		}
+	}
+	public void measurementsChanged(){
+		notifyObservers();
+	}
+	//to Test
+	public void setMeasurements(float temp,float humidity,float pressure){
+		this.temperature = temp;
+		this.humidity = humidity;
+		this.pressure = pressure;
+		measurementsChanged();
+	}
+/*	public void update(float temp,float humidity,float pressure){
+		
+	}
+	public void display(){
+		
+	}*/
+}
+
+class CurrentConditionsDisplay implements Observer,DisplayElement{
+	private float temperature;
+	private float humidity;
+	private float pressure;
+	private Subject weatherData;
+	public CurrentConditionsDisplay(Subject weatherData){
+		this.weatherData = weatherData;
+		weatherData.registerObserver(this);
+	}
+	public void update(float temp,float humidity,float pressure){
+		this.temperature = temp;
+		this.humidity = humidity;
+		this.pressure = pressure;
+		display();
+	}
+	public void display(){
+		System.out.println("temperature:"+temperature+" ,humidity:"+humidity);
+	}
+}
+
+public class ObserverTest{
+	public static void main(String[] args){
+		WeatherData wd = new WeatherData();
+	CurrentConditionsDisplay ccd = new CurrentConditionsDisplay(wd);
+	wd.setMeasurements(23,323,44.3f);
+	}
+	
+}
